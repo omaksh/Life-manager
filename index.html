@@ -1,0 +1,607 @@
+1<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Life Manager App</title>
+    
+    <style>
+        /* Basic Reset and Variables */
+        :root {
+            --primary-color: #007bff; /* Blue for a modern look */
+            --secondary-color: #0056b3; /* Darker Blue */
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --background-color: #f8f9fa;
+            --text-color: #212529;
+            --shadow-light: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* App Container (Mobile Mockup) */
+        .app-container {
+            width: 100%;
+            max-width: 400px; 
+            height: 100vh;
+            max-height: 800px;
+            background-color: #fff;
+            box-shadow: var(--shadow-light);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 15px; 
+        }
+
+        /* Header */
+        .app-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 18px;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+        }
+
+        /* Main Content Area */
+        .content-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: var(--background-color);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content h2 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+
+        /* --- Finance Manager Styles --- */
+        .balance-display {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        #finance-form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        .add-transaction-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        #transaction-list {
+            list-style: none;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .income { color: var(--success-color); font-weight: bold; }
+        .expense { color: var(--danger-color); font-weight: bold; }
+
+        /* --- To-Do List / Habit Styles (Shared) --- */
+        .todo-input-group {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        #new-task, #new-habit {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .add-task-btn {
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+
+        #task-list li, #habit-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: white;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        #task-list li.completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .delete-btn {
+            background: var(--danger-color); 
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-left: 5px; /* Space between tick and cross */
+        }
+
+        /* --- Habit/To-Do Tick Button Styles --- */
+        .habit-check-btn {
+            background: none;
+            border: 2px solid #ccc;
+            color: #ccc;
+            padding: 5px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            line-height: 1;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 10px; 
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .habit-check-btn.checked {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        /* --- Goal Styles --- */
+        #goal-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .goal-item {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+
+        .goal-item h4 {
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+
+        .progress-bar-container {
+            height: 10px;
+            background-color: #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--success-color);
+            transition: width 0.5s ease-in-out;
+        }
+
+
+        /* Mobile Navigation Bar */
+        .mobile-nav {
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid #dee2e6;
+            background-color: white;
+            padding: 8px 0;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-btn {
+            flex: 1;
+            border: none;
+            background: none;
+            color: var(--text-color);
+            padding: 8px 5px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: color 0.3s;
+        }
+
+        .nav-btn .icon {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+
+        .nav-btn.active-nav {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Advanced Life Manager 📊</h1>
+        </header>
+
+        <main class="content-area">
+            <section id="finance" class="tab-content active">
+                <h2>💰 Finance Tracker</h2>
+                <div class="balance-display">
+                    Total Balance: <span id="current-balance">$0.00</span>
+                </div>
+
+                <form id="finance-form">
+                    <input type="text" id="finance-description" placeholder="Description (e.g., Salary, Rent)" required>
+                    <input type="number" id="finance-amount" placeholder="Amount (e.g., 500 or -150)" required>
+                    <button type="submit" class="add-transaction-btn">Add Transaction</button>
+                </form>
+                
+                <h3>Transaction History</h3>
+                <ul id="transaction-list">
+                    </ul>
+            </section>
+
+            <section id="todo" class="tab-content">
+                <h2>✅ To-Do List</h2>
+                <div class="todo-input-group">
+                    <input type="text" id="new-task" placeholder="Add a new task..." required>
+                    <button onclick="addTask()" class="add-task-btn">Add Task</button>
+                </div>
+                <ul id="task-list">
+                    </ul>
+            </section>
+
+            <section id="habit" class="tab-content">
+                <h2>🎯 Habit Tracker</h2>
+                <div class="todo-input-group">
+                    <input type="text" id="new-habit" placeholder="e.g., Drink 8 glasses of water" required>
+                    <button onclick="addHabit()" class="add-task-btn">Add Habit</button>
+                </div>
+                <ul id="habit-list">
+                    </ul>
+            </section>
+
+            <section id="goal" class="tab-content">
+                <h2>🚀 Goal Setter</h2>
+                <form id="goal-form">
+                    <input type="text" id="goal-description" placeholder="Goal (e.g., Save $5000)" required>
+                    <input type="number" id="goal-target" placeholder="Target Value (e.g., 5000)" required>
+                    <button type="submit" class="add-transaction-btn">Set Goal</button>
+                </form>
+                
+                <ul id="goal-list">
+                    </ul>
+            </section>
+        </main>
+
+        <nav class="mobile-nav">
+            <button class="nav-btn active-nav" data-tab="finance">
+                <span class="icon">💰</span> Finance
+            </button>
+            <button class="nav-btn" data-tab="todo">
+                <span class="icon">✅</span> To Do
+            </button>
+            <button class="nav-btn" data-tab="habit">
+                <span class="icon">🎯</span> Habit
+            </button>
+            <button class="nav-btn" data-tab="goal">
+                <span class="icon">🚀</span> Goal
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        // --- Data Structure Initialization ---
+        // Load data from Local Storage or use empty arrays
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        let habits = JSON.parse(localStorage.getItem('habits')) || [];
+        let goals = JSON.parse(localStorage.getItem('goals')) || [];
+
+        // --- Utility Functions ---
+
+        // Format currency
+        const formatCurrency = (amount) => {
+            if (typeof amount !== 'number') amount = 0;
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        };
+
+        // Update Local Storage
+        const updateLocalStorage = () => {
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('habits', JSON.stringify(habits));
+            localStorage.setItem('goals', JSON.stringify(goals));
+        };
+
+
+        // ===================================
+        // 1. FINANCE MANAGER LOGIC
+        // ===================================
+
+        const transactionList = document.getElementById('transaction-list');
+        const currentBalanceEl = document.getElementById('current-balance');
+
+        // Renders the list of transactions and updates the balance
+        const updateFinanceUI = () => {
+            transactionList.innerHTML = '';
+            let totalBalance = 0;
+
+            transactions.forEach((t, index) => {
+                const sign = t.amount < 0 ? '' : '+';
+                const item = document.createElement('li');
+                const amountClass = t.amount < 0 ? 'expense' : 'income';
+
+                item.classList.add('transaction-item');
+                item.innerHTML = `
+                    <span>${t.description}</span>
+                    <span class="${amountClass}">
+                        ${sign}${formatCurrency(t.amount)}
+                        <button class="delete-btn" onclick="deleteTransaction(${index})">X</button>
+                    </span>
+                `;
+                transactionList.appendChild(item);
+                totalBalance += t.amount;
+            });
+
+            currentBalanceEl.textContent = formatCurrency(totalBalance);
+            updateLocalStorage();
+        };
+
+        // Delete a transaction
+        const deleteTransaction = (index) => {
+            transactions.splice(index, 1);
+            updateFinanceUI();
+            updateGoalUI();
+        };
+
+
+        // ===================================
+        // 2. TO-DO LIST LOGIC
+        // ===================================
+
+        const taskList = document.getElementById('task-list');
+
+        // Renders the list of tasks
+        const updateTaskUI = () => {
+            taskList.innerHTML = '';
+            tasks.forEach((t, index) => {
+                const item = document.createElement('li');
+                item.classList.toggle('completed', t.completed);
+                
+                // To-Do Item Structure with separate tick and cross buttons
+                item.innerHTML = `
+                    <span>${t.text}</span>
+                    <div>
+                        <button class="habit-check-btn ${t.completed ? 'checked' : ''}" 
+                                onclick="toggleTask(${index})">
+                            ${t.completed ? '✓' : ''}
+                        </button>
+                        <button class="delete-btn" onclick="deleteTask(${index})">X</button>
+                    </div>
+                `;
+                
+                taskList.appendChild(item);
+            });
+            updateLocalStorage();
+        };
+
+        // Add a new task
+        const addTask = () => {
+            const input = document.getElementById('new-task');
+            const taskText = input.value.trim();
+
+            if (taskText) {
+                tasks.push({ text: taskText, completed: false });
+                updateTaskUI();
+                input.value = '';
+            }
+        };
+
+        // Delete a task
+        const deleteTask = (index) => {
+            tasks.splice(index, 1);
+            updateTaskUI();
+        };
+
+        // Toggle task completion status
+        const toggleTask = (index) => {
+            tasks[index].completed = !tasks[index].completed;
+            updateTaskUI();
+        };
+
+
+        // ===================================
+        // 3. HABIT TRACKER LOGIC
+        // ===================================
+
+        const habitList = document.getElementById('habit-list');
+
+        const updateHabitUI = () => {
+            habitList.innerHTML = '';
+            const today = new Date().toDateString();
+            
+            habits.forEach((h, index) => {
+                // Reset completion status if it's a new day
+                if (h.lastCheckedDate !== today) {
+                    h.completedToday = false;
+                }
+
+                const item = document.createElement('li');
+                item.innerHTML = `
+                    <span>${h.text}</span>
+                    <div>
+                        <button class="habit-check-btn ${h.completedToday ? 'checked' : ''}" 
+                                onclick="toggleHabit(${index})">
+                            ${h.completedToday ? '✓' : ''}
+                        </button>
+                        <button class="delete-btn" onclick="deleteHabit(${index})">X</button>
+                    </div>
+                `;
+                habitList.appendChild(item);
+            });
+
+            updateLocalStorage();
+        };
+
+        // Add a new habit
+        const addHabit = () => {
+            const input = document.getElementById('new-habit');
+            const habitText = input.value.trim();
+
+            if (habitText) {
+                habits.push({ 
+                    text: habitText, 
+                    completedToday: false, 
+                    lastCheckedDate: new Date().toDateString()
+                });
+                updateHabitUI();
+                input.value = '';
+            }
+        };
+
+        // Toggle habit completion status
+        const toggleHabit = (index) => {
+            const today = new Date().toDateString();
+            const habit = habits[index];
+            
+            habit.completedToday = !habit.completedToday;
+            habit.lastCheckedDate = today;
+
+            updateHabitUI();
+        };
+
+        // Delete Habit
+        const deleteHabit = (index) => {
+            habits.splice(index, 1);
+            updateHabitUI();
+        };
+
+
+        // ===================================
+        // 4. GOAL SETTER LOGIC
+        // ===================================
+
+        const goalList = document.getElementById('goal-list');
+
+        const updateGoalUI = () => {
+            goalList.innerHTML = '';
+
+            goals.forEach((g, index) => {
+                // Calculate progress based on total current balance
+                const currentAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
+                const progressValue = Math.min(Math.max(currentAmount, 0), g.target); 
+                const percentage = Math.floor((progressValue / g.target) * 100) || 0; 
+
+                const item = document.createElement('li');
+                item.classList.add('goal-item');
+                item.innerHTML = `
+                    <h4>${g.description}</h4>
+                    <p>Target: ${formatCurrency(g.target)}</p>
+                    <p>Progress: ${formatCurrency(progressValue)} (${percentage}%)</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: ${percentage}%;"></div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteGoal(${index})">Delete</button>
+                `;
+                goalList.appendChild(item);
+            });
+            updateLocalStorage();
+        };
+
+        // Handle new goal submission
+        document.getElementById('goal-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const description = document.getElementById('goal-description').value.trim();
+            const target = parseFloat(document.getElementById('goal-target').value);
+
+            if (description && !isNaN(target) && target > 0) {
+                goals.push({ description, target });
+                updateGoalUI();
+                
+                document.getElementById('goal-description').value = '';
+                document.getElementById('goal-target').value = '';
+            } else {
+                alert('Please enter a valid goal description and a positive target amount.');
+            }
+        });
+
+        const deleteGoal = (index) => {
+            goals.splice(index, 1);
+            updateGoalUI();
+        };
+
+
+        // ===================================
+        // 5. INITIALIZATION & EVENT LISTENERS
+        // ===================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            const switchTab = (targetTabId, button) => {
+                tabContents.forEach(content => { content.classList.remove('active'); });
+                navButtons.forEach(btn => { btn.classList.remove('active-nav'); });
+                
+                const targetContent = document.getElementById(targetTabId);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+                button.classList.add('active-nav');
+            };
+
+  
